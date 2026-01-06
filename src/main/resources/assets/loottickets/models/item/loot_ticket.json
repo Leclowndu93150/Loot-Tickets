@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "loottickets:item/loot_ticket_outline",
+    "layer1": "loottickets:item/loot_ticket_center"
+  }
+}

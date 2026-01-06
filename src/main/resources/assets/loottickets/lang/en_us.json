@@ -1,0 +1,27 @@
+{
+  "itemGroup.loottickets": "Loot Tickets",
+
+  "item.loottickets.ticket_extractor": "Ticket Wand",
+  "item.loottickets.ticket_extractor.tooltip": "Right-click on unopened loot chests to extract tickets",
+  "item.loottickets.loot_ticket": "Loot Ticket",
+  "item.loottickets.ticket_bag": "Ticket Bag",
+
+  "block.loottickets.redemption_center": "Loot Redemption Center",
+
+  "container.loottickets.redemption_center": "Loot Redemption Center",
+  "container.loottickets.ticket_bag": "Ticket Bag",
+
+  "entity.minecraft.villager.loottickets.redemption_center_employee": "Redemption Center Employee",
+
+  "gui.loottickets.jei.loot_ticket": "Loot Ticket Redemption",
+  "gui.loottickets.blocked.title": "Processing Blocked",
+  "gui.loottickets.blocked.description": "Clear the output slots to process this ticket",
+  "gui.loottickets.blacklisted.title": "Cannot Redeem",
+  "gui.loottickets.blacklisted.description": "This loot table is blacklisted and cannot be redeemed",
+
+  "curios.identifier.ticket_bag": "Ticket Bag",
+
+  "commands.loottickets.give.success.single": "Gave %s loot ticket(s) for %s to %s",
+  "commands.loottickets.give.success.multiple": "Gave %s loot ticket(s) for %s to %s players",
+  "commands.loottickets.invalid_loot_table": "Invalid loot table: %s"
+}

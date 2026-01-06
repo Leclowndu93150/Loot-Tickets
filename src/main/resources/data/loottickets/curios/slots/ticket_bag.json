@@ -1,0 +1,6 @@
+{
+  "order": 200,
+  "size": 1,
+  "icon": "loottickets:slot/empty_ticket_bag_slot",
+  "validators": ["curios:tag"]
+}

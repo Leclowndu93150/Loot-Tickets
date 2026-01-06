@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "loottickets:block/redemption_center"
+    }
+  }
+}

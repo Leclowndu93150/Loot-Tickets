@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "E",
+    "J",
+    "C"
+  ],
+  "key": {
+    "E": {
+      "item": "minecraft:emerald"
+    },
+    "J": {
+      "item": "minecraft:jukebox"
+    },
+    "C": {
+      "item": "minecraft:cauldron"
+    }
+  },
+  "result": {
+    "id": "loottickets:redemption_center",
+    "count": 1
+  }
+}
