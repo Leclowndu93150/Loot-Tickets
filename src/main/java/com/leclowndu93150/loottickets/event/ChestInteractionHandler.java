@@ -15,7 +15,10 @@ import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.TrappedChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -46,14 +49,12 @@ public class ChestInteractionHandler {
         BlockPos pos = event.getPos();
         BlockEntity blockEntity = level.getBlockEntity(pos);
 
-        // Handle Lootr chests if Lootr is loaded
         if (ModList.get().isLoaded(LOOTR_MODID)) {
             if (handleLootrInteraction(blockEntity, player, level, pos, event)) {
                 return;
             }
         }
 
-        // Vanilla loot chest handling
         if (!(blockEntity instanceof RandomizableContainer container)) {
             return;
         }
@@ -69,6 +70,8 @@ public class ChestInteractionHandler {
 
                 container.setLootTable(null);
                 blockEntity.setChanged();
+
+                triggerTrapIfNeeded(level, pos, blockEntity, player);
 
                 level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP,
                     SoundSource.PLAYERS, 1.0F, 1.2F);
@@ -97,5 +100,14 @@ public class ChestInteractionHandler {
             return handled;
         }
         return false;
+    }
+
+    private static void triggerTrapIfNeeded(Level level, BlockPos pos, BlockEntity blockEntity, Player player) {
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof TrappedChestBlock && blockEntity instanceof ChestBlockEntity chestBE) {
+            // Temporarily increase open count so getSignal() returns > 0
+            chestBE.startOpen(player);
+            chestBE.stopOpen(player);
+        }
     }
 }

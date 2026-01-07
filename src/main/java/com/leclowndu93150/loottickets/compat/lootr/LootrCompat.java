@@ -16,6 +16,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.neoforge.network.PacketDistributor;
+import noobanidus.mods.lootr.common.block.LootrTrappedChestBlock;
+import noobanidus.mods.lootr.common.block.entity.LootrChestBlockEntity;
 import noobanidus.mods.lootr.common.api.LootrAPI;
 import noobanidus.mods.lootr.common.api.data.ILootrInfoProvider;
 import noobanidus.mods.lootr.common.api.data.blockentity.ILootrBlockEntity;
@@ -64,6 +66,8 @@ public class LootrCompat {
                 sendVisualUpdatePacket(serverPlayer, pos);
             }
 
+            triggerTrapIfNeeded(level, pos, blockEntity, player);
+
             level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1.0F, 1.2F);
         }
 
@@ -72,5 +76,13 @@ public class LootrCompat {
 
     private static void sendVisualUpdatePacket(ServerPlayer player, BlockPos pos) {
         PacketDistributor.sendToPlayer(player, new PacketOpenContainer(pos));
+    }
+
+    private static void triggerTrapIfNeeded(Level level, BlockPos pos, BlockEntity blockEntity, Player player) {
+        if (level.getBlockState(pos).getBlock() instanceof LootrTrappedChestBlock
+                && blockEntity instanceof LootrChestBlockEntity chestBE) {
+            chestBE.startOpen(player);
+            chestBE.stopOpen(player);
+        }
     }
 }

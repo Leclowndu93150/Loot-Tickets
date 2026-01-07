@@ -172,10 +172,19 @@ public class RedemptionCenterBlockEntity extends BaseContainerBlockEntity implem
         }
     }
 
+    private static final int[] SLOTS_FOR_UP = new int[]{TICKET_SLOT};
+
     @Override
     public int[] getSlotsForFace(Direction side) {
-        // Only expose output slots from bottom - ticket slot is never exposed to hoppers
-        return side == Direction.DOWN ? SLOTS_FOR_DOWN : new int[0];
+        // Top: ticket slot for input only
+        // Bottom: output slots for extraction only
+        // Sides: nothing
+        if (side == Direction.UP) {
+            return SLOTS_FOR_UP;
+        } else if (side == Direction.DOWN) {
+            return SLOTS_FOR_DOWN;
+        }
+        return new int[0];
     }
 
     @Override
@@ -190,6 +199,9 @@ public class RedemptionCenterBlockEntity extends BaseContainerBlockEntity implem
 
     @Override
     public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction) {
+        if (slot == TICKET_SLOT) {
+            return stack.is(ModItems.TICKET_BAG.get()) && TicketBagItem.getTicketCount(stack) == 0;
+        }
         return slot >= OUTPUT_SLOT_START && direction == Direction.DOWN;
     }
 
