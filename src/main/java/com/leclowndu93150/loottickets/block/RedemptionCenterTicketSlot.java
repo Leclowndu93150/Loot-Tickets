@@ -1,5 +1,6 @@
 package com.leclowndu93150.loottickets.block;
 
+import com.leclowndu93150.loottickets.item.TicketBagItem;
 import com.leclowndu93150.loottickets.registry.ModDataComponents;
 import com.leclowndu93150.loottickets.registry.ModItems;
 import net.minecraft.world.Container;
@@ -14,7 +15,12 @@ public class RedemptionCenterTicketSlot extends Slot {
 
     @Override
     public boolean mayPlace(ItemStack stack) {
-        return stack.is(ModItems.LOOT_TICKET.get())
-            && stack.has(ModDataComponents.LOOT_TICKET_DATA.get());
+        if (stack.is(ModItems.LOOT_TICKET.get()) && stack.has(ModDataComponents.LOOT_TICKET_DATA.get())) {
+            return true;
+        }
+        if (stack.is(ModItems.TICKET_BAG.get()) && TicketBagItem.getTicketCount(stack) > 0) {
+            return true;
+        }
+        return false;
     }
 }

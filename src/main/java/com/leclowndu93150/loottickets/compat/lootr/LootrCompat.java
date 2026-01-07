@@ -15,10 +15,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.neoforged.neoforge.network.PacketDistributor;
 import noobanidus.mods.lootr.common.api.LootrAPI;
 import noobanidus.mods.lootr.common.api.data.ILootrInfoProvider;
 import noobanidus.mods.lootr.common.api.data.blockentity.ILootrBlockEntity;
 import noobanidus.mods.lootr.common.api.data.inventory.ILootrInventory;
+import noobanidus.mods.lootr.neoforge.network.toClient.PacketOpenContainer;
 
 public class LootrCompat {
 
@@ -58,11 +60,17 @@ public class LootrCompat {
                 if (inventory != null) {
                     inventory.clearContent();
                 }
+
+                sendVisualUpdatePacket(serverPlayer, pos);
             }
 
             level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1.0F, 1.2F);
         }
 
         return true;
+    }
+
+    private static void sendVisualUpdatePacket(ServerPlayer player, BlockPos pos) {
+        PacketDistributor.sendToPlayer(player, new PacketOpenContainer(pos));
     }
 }

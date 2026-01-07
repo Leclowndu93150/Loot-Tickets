@@ -2,6 +2,7 @@ package com.leclowndu93150.loottickets.block;
 
 import com.leclowndu93150.loottickets.Config;
 import com.leclowndu93150.loottickets.component.LootTicketData;
+import com.leclowndu93150.loottickets.item.TicketBagItem;
 import com.leclowndu93150.loottickets.registry.ModDataComponents;
 import com.leclowndu93150.loottickets.registry.ModItems;
 import com.leclowndu93150.loottickets.registry.ModMenuTypes;
@@ -64,8 +65,12 @@ public class RedemptionCenterMenu extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
             } else {
-                if (slotItem.is(ModItems.LOOT_TICKET.get())
-                    && slotItem.has(ModDataComponents.LOOT_TICKET_DATA.get())) {
+                boolean isTicket = slotItem.is(ModItems.LOOT_TICKET.get())
+                    && slotItem.has(ModDataComponents.LOOT_TICKET_DATA.get());
+                boolean isTicketBag = slotItem.is(ModItems.TICKET_BAG.get())
+                    && TicketBagItem.getTicketCount(slotItem) > 0;
+
+                if (isTicket || isTicketBag) {
                     if (!this.moveItemStackTo(slotItem, 0, 1, false)) {
                         return ItemStack.EMPTY;
                     }

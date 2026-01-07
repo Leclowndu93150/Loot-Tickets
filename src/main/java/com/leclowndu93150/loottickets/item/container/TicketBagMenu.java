@@ -31,11 +31,11 @@ public class TicketBagMenu extends AbstractContainerMenu {
 
         for (int row = 0; row < 6; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new TicketBagSlot(container, col + row * 9, 8 + col * 18, 18 + row * 18));
+                this.addSlot(new TicketBagSlot(container, col + row * 9, 8 + col * 18, 19 + row * 18));
             }
         }
 
-        int playerInvY = 140;
+        int playerInvY = 141;
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, playerInvY + row * 18));

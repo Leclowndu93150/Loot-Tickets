@@ -2,6 +2,7 @@ package com.leclowndu93150.loottickets.block;
 
 import com.leclowndu93150.loottickets.Config;
 import com.leclowndu93150.loottickets.component.LootTicketData;
+import com.leclowndu93150.loottickets.item.TicketBagItem;
 import com.leclowndu93150.loottickets.registry.ModBlockEntities;
 import com.leclowndu93150.loottickets.registry.ModDataComponents;
 import com.leclowndu93150.loottickets.registry.ModItems;
@@ -61,8 +62,55 @@ public class RedemptionCenterBlockEntity extends BaseContainerBlockEntity implem
             return;
         }
 
-        ItemStack ticketStack = items.get(TICKET_SLOT);
-        if (ticketStack.isEmpty() || !ticketStack.is(ModItems.LOOT_TICKET.get())) {
+        ItemStack slotStack = items.get(TICKET_SLOT);
+        if (slotStack.isEmpty()) {
+            return;
+        }
+
+        // Handle ticket bag
+        if (slotStack.is(ModItems.TICKET_BAG.get())) {
+            processTicketFromBag(slotStack, level, pos);
+            return;
+        }
+
+        // Handle regular ticket
+        if (!slotStack.is(ModItems.LOOT_TICKET.get())) {
+            return;
+        }
+
+        LootTicketData data = slotStack.get(ModDataComponents.LOOT_TICKET_DATA.get());
+        if (data == null || !(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        // Skip blacklisted loot tables
+        if (!Config.isLootTableRedeemable(data.lootTable().location())) {
+            return;
+        }
+
+        LootTable lootTable = serverLevel.getServer()
+            .reloadableRegistries()
+            .getLootTable(data.lootTable());
+
+        if (lootTable == LootTable.EMPTY) {
+            return;
+        }
+
+        LootParams params = new LootParams.Builder(serverLevel)
+            .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(worldPosition))
+            .create(LootContextParamSets.CHEST);
+
+        lootTable.getRandomItems(params).forEach(this::addLootToOutput);
+
+        slotStack.shrink(1);
+        setChanged();
+
+        level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
+    }
+
+    private void processTicketFromBag(ItemStack bagStack, Level level, BlockPos pos) {
+        ItemStack ticketStack = TicketBagItem.getFirstTicket(bagStack);
+        if (ticketStack.isEmpty()) {
             return;
         }
 
@@ -90,7 +138,7 @@ public class RedemptionCenterBlockEntity extends BaseContainerBlockEntity implem
 
         lootTable.getRandomItems(params).forEach(this::addLootToOutput);
 
-        ticketStack.shrink(1);
+        TicketBagItem.removeOneTicket(bagStack);
         setChanged();
 
         level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -173,8 +221,12 @@ public class RedemptionCenterBlockEntity extends BaseContainerBlockEntity implem
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         if (slot == TICKET_SLOT) {
-            return stack.is(ModItems.LOOT_TICKET.get())
-                && stack.has(ModDataComponents.LOOT_TICKET_DATA.get());
+            if (stack.is(ModItems.LOOT_TICKET.get()) && stack.has(ModDataComponents.LOOT_TICKET_DATA.get())) {
+                return true;
+            }
+            if (stack.is(ModItems.TICKET_BAG.get()) && TicketBagItem.getTicketCount(stack) > 0) {
+                return true;
+            }
         }
         return false;
     }
