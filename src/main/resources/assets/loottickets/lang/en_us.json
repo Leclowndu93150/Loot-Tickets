@@ -19,6 +19,8 @@
   "gui.loottickets.blacklisted.title": "Cannot Redeem",
   "gui.loottickets.blacklisted.description": "This loot table is blacklisted and cannot be redeemed",
 
+  "message.loottickets.blacklisted": "This chest's loot table is blacklisted!",
+
   "curios.identifier.ticket_bag": "Ticket Bag",
 
   "commands.loottickets.give.success.single": "Gave %s loot ticket(s) for %s to %s",

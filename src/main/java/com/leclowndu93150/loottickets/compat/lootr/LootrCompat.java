@@ -1,10 +1,12 @@
 package com.leclowndu93150.loottickets.compat.lootr;
 
+import com.leclowndu93150.loottickets.Config;
 import com.leclowndu93150.loottickets.component.LootTicketData;
 import com.leclowndu93150.loottickets.event.TicketPickupHandler;
 import com.leclowndu93150.loottickets.registry.ModDataComponents;
 import com.leclowndu93150.loottickets.registry.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,6 +41,15 @@ public class LootrCompat {
 
         if (lootTable == null) {
             if (!level.isClientSide) {
+                level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 1.0F, 1.0F);
+            }
+            return true;
+        }
+
+        // Check if loot table is blacklisted
+        if (!Config.isLootTableRedeemable(lootTable.location())) {
+            if (!level.isClientSide) {
+                player.displayClientMessage(Component.translatable("message.loottickets.blacklisted"), true);
                 level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 1.0F, 1.0F);
             }
             return true;

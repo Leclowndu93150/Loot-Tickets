@@ -1,18 +1,22 @@
 package com.leclowndu93150.loottickets.event;
 
+import com.leclowndu93150.loottickets.Config;
 import com.leclowndu93150.loottickets.LootTickets;
 import com.leclowndu93150.loottickets.compat.lootr.LootrCompat;
 import com.leclowndu93150.loottickets.component.LootTicketData;
 import com.leclowndu93150.loottickets.registry.ModDataComponents;
 import com.leclowndu93150.loottickets.registry.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.RandomizableContainer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.TrappedChestBlock;
@@ -62,6 +66,17 @@ public class ChestInteractionHandler {
         ResourceKey<LootTable> lootTable = container.getLootTable();
 
         if (lootTable != null) {
+            // Check if loot table is blacklisted
+            if (!Config.isLootTableRedeemable(lootTable.location())) {
+                if (!level.isClientSide) {
+                    player.displayClientMessage(Component.translatable("message.loottickets.blacklisted"), true);
+                    level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 1.0F, 1.0F);
+                }
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.FAIL);
+                return;
+            }
+
             if (!level.isClientSide && level instanceof ServerLevel) {
                 ItemStack ticket = new ItemStack(ModItems.LOOT_TICKET.get());
                 ticket.set(ModDataComponents.LOOT_TICKET_DATA.get(), new LootTicketData(lootTable));
@@ -100,6 +115,64 @@ public class ChestInteractionHandler {
             return handled;
         }
         return false;
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        Player player = event.getEntity();
+        ItemStack heldItem = event.getItemStack();
+
+        if (!heldItem.is(ModItems.TICKET_EXTRACTOR.get())) {
+            return;
+        }
+
+        if (player instanceof FakePlayer) {
+            return;
+        }
+
+        Entity target = event.getTarget();
+        if (!(target instanceof AbstractMinecartContainer minecart)) {
+            return;
+        }
+
+        Level level = event.getLevel();
+        ResourceKey<LootTable> lootTable = minecart.getLootTable();
+
+        if (lootTable != null) {
+            // Check if loot table is blacklisted
+            if (!Config.isLootTableRedeemable(lootTable.location())) {
+                if (!level.isClientSide) {
+                    player.displayClientMessage(Component.translatable("message.loottickets.blacklisted"), true);
+                    level.playSound(null, target.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 1.0F, 1.0F);
+                }
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.FAIL);
+                return;
+            }
+
+            if (!level.isClientSide && level instanceof ServerLevel) {
+                ItemStack ticket = new ItemStack(ModItems.LOOT_TICKET.get());
+                ticket.set(ModDataComponents.LOOT_TICKET_DATA.get(), new LootTicketData(lootTable));
+
+                TicketPickupHandler.giveTicketToPlayer(player, ticket);
+
+                minecart.setLootTable(null);
+
+                level.playSound(null, target.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP,
+                    SoundSource.PLAYERS, 1.0F, 1.2F);
+            }
+
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+        } else {
+            if (!level.isClientSide) {
+                level.playSound(null, target.blockPosition(), SoundEvents.VILLAGER_NO,
+                    SoundSource.PLAYERS, 1.0F, 1.0F);
+            }
+
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.FAIL);
+        }
     }
 
     private static void triggerTrapIfNeeded(Level level, BlockPos pos, BlockEntity blockEntity, Player player) {

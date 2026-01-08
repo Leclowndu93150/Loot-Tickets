@@ -189,19 +189,25 @@ public class RedemptionCenterBlockEntity extends BaseContainerBlockEntity implem
 
     @Override
     public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction direction) {
-        if (slot == TICKET_SLOT) {
-            return stack.is(ModItems.LOOT_TICKET.get())
-                && stack.has(ModDataComponents.LOOT_TICKET_DATA.get())
-                && !hasOutputItems();
+        // Allow hopper input to ticket slot from above only
+        if (slot == TICKET_SLOT && direction == Direction.UP) {
+            if (stack.is(ModItems.LOOT_TICKET.get()) && stack.has(ModDataComponents.LOOT_TICKET_DATA.get())) {
+                return !hasOutputItems();
+            }
+            if (stack.is(ModItems.TICKET_BAG.get()) && TicketBagItem.getTicketCount(stack) > 0) {
+                return !hasOutputItems();
+            }
         }
         return false;
     }
 
     @Override
     public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction) {
+        // NEVER allow extraction from ticket slot via hoppers
         if (slot == TICKET_SLOT) {
-            return stack.is(ModItems.TICKET_BAG.get()) && TicketBagItem.getTicketCount(stack) == 0;
+            return false;
         }
+        // Only allow extraction from output slots via bottom
         return slot >= OUTPUT_SLOT_START && direction == Direction.DOWN;
     }
 

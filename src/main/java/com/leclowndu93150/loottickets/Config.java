@@ -85,9 +85,7 @@ public class Config {
                  "These tables cause lag or other issues when generated (e.g., explorer maps)")
         .defineListAllowEmpty("redemption.blacklist",
             List.of(
-                "minecraft:chests/shipwreck_map",
-                "minecraft:chests/shipwreck_supply",
-                "minecraft:chests/shipwreck_treasure"
+                "minecraft:chests/shipwreck_map"
             ),
             Config::validateLootTableString
         );
