@@ -7,6 +7,7 @@ import com.leclowndu93150.loottickets.component.LootTicketData;
 import com.leclowndu93150.loottickets.registry.ModDataComponents;
 import com.leclowndu93150.loottickets.registry.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -77,7 +78,7 @@ public class ChestInteractionHandler {
                 return;
             }
 
-            if (!level.isClientSide && level instanceof ServerLevel) {
+            if (!level.isClientSide && level instanceof ServerLevel serverLevel) {
                 ItemStack ticket = new ItemStack(ModItems.LOOT_TICKET.get());
                 ticket.set(ModDataComponents.LOOT_TICKET_DATA.get(), new LootTicketData(lootTable));
 
@@ -87,6 +88,8 @@ public class ChestInteractionHandler {
                 blockEntity.setChanged();
 
                 triggerTrapIfNeeded(level, pos, blockEntity, player);
+
+                spawnMagicalParticles(serverLevel, pos);
 
                 level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP,
                     SoundSource.PLAYERS, 1.0F, 1.2F);
@@ -150,13 +153,15 @@ public class ChestInteractionHandler {
                 return;
             }
 
-            if (!level.isClientSide && level instanceof ServerLevel) {
+            if (!level.isClientSide && level instanceof ServerLevel serverLevel) {
                 ItemStack ticket = new ItemStack(ModItems.LOOT_TICKET.get());
                 ticket.set(ModDataComponents.LOOT_TICKET_DATA.get(), new LootTicketData(lootTable));
 
                 TicketPickupHandler.giveTicketToPlayer(player, ticket);
 
                 minecart.setLootTable(null);
+
+                spawnMagicalParticles(serverLevel, target.blockPosition());
 
                 level.playSound(null, target.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP,
                     SoundSource.PLAYERS, 1.0F, 1.2F);
@@ -173,6 +178,15 @@ public class ChestInteractionHandler {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.FAIL);
         }
+    }
+
+    private static void spawnMagicalParticles(ServerLevel level, BlockPos pos) {
+        double cx = pos.getX() + 0.5;
+        double cy = pos.getY() + 0.7;
+        double cz = pos.getZ() + 0.5;
+        level.sendParticles(ParticleTypes.ENCHANT, cx, cy + 0.5, cz, 30, 0.4, 0.3, 0.4, 0.5);
+        level.sendParticles(ParticleTypes.PORTAL, cx, cy, cz, 15, 0.3, 0.2, 0.3, 0.3);
+        level.sendParticles(ParticleTypes.END_ROD, cx, cy, cz, 8, 0.3, 0.3, 0.3, 0.02);
     }
 
     private static void triggerTrapIfNeeded(Level level, BlockPos pos, BlockEntity blockEntity, Player player) {
